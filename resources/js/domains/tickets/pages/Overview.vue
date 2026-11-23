@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import ErrorMessage from '@/components/ErrorMessage.vue';
-import { ticketStore, type Ticket } from '@/domains/tickets/store';
-
-const statusLabels: Record<Ticket['status'], string> = {
-    pending: 'In afwachting',
-    in_progress: 'In behandeling',
-    resolved: 'Afgehandeld'
-};
+import { categoryNames, formatDate, fullName, statusLabel } from '@/domains/tickets/helpers';
+import { ticketStore } from '@/domains/tickets/store';
 
 const tickets = computed(() =>
     Object.values(ticketStore.getters.all.value).sort((first, second) => {
@@ -17,16 +12,6 @@ const tickets = computed(() =>
         return secondDate - firstDate || second.id - first.id;
     })
 );
-
-const statusLabel = (status: Ticket['status']) => statusLabels[status] ?? status;
-
-const formatDate = (value?: string) => (value ? new Date(value).toLocaleString('nl-NL') : '-');
-
-const categoryNames = (ticket: Ticket) =>
-    ticket.categories?.length ? ticket.categories.map(category => category.name).join(', ') : '-';
-
-const fullName = (user: Ticket['creator'] | Ticket['assignee']) =>
-    user ? `${user.first_name} ${user.last_name}` : '-';
 
 onMounted(async () => {
     try {
@@ -40,6 +25,10 @@ onMounted(async () => {
 <template>
     <main>
         <h1>Ticketoverzicht</h1>
+
+        <p>
+            <RouterLink :to="{ name: 'tickets.create' }">Nieuw ticket</RouterLink>
+        </p>
 
         <ErrorMessage />
 
@@ -59,7 +48,11 @@ onMounted(async () => {
             <tbody>
                 <tr v-for="ticket in tickets" :key="ticket.id">
                     <td>{{ ticket.id }}</td>
-                    <td>{{ ticket.title }}</td>
+                    <td>
+                        <RouterLink :to="{ name: 'tickets.show', params: { id: ticket.id } }">
+                            {{ ticket.title }}
+                        </RouterLink>
+                    </td>
                     <td>{{ categoryNames(ticket) }}</td>
                     <td>{{ statusLabel(ticket.status) }}</td>
                     <td>{{ fullName(ticket.creator) }}</td>
