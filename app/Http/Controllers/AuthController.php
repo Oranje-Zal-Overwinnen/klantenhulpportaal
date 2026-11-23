@@ -3,13 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = User::create([
+            ...$request->validated(),
+            'role' => User::ROLE_USER,
+        ]);
+
+        $user->notify(new VerifyEmailNotification());
+
+        return response()->json([
+            'message' => 'Registratie gelukt. Controleer je e-mail om je account te bevestigen.',
+        ], 201);
+    }
+
     public function login(LoginRequest $request): UserResource|JsonResponse
     {
         if (! Auth::attempt($request->only('email', 'password'))) {

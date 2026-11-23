@@ -16,6 +16,15 @@ interface Credentials {
     password: string;
 }
 
+export interface RegisterData {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string | null;
+    password: string;
+    password_confirmation: string;
+}
+
 const user = ref<AuthUser | null>(null);
 
 const getters = {
@@ -40,6 +49,10 @@ const actions = {
             user.value = null;
             return false;
         }
+    },
+    register: async (data: RegisterData) => {
+        await axios.get('/sanctum/csrf-cookie');
+        return postRequest('/register', data);
     },
     login: async (credentials: Credentials) => {
         await axios.get('/sanctum/csrf-cookie');

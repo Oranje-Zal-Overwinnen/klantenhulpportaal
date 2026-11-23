@@ -39,6 +39,14 @@ const handleSubmit = async () => {
     <main>
         <h1>Inloggen</h1>
 
+        <p v-if="route.query.registered === '1'">
+            Registratie gelukt. Controleer je e-mail om je account te bevestigen.
+        </p>
+
+        <p v-if="route.query.verified === '1'">
+            Je e-mailadres is bevestigd. Je kunt nu inloggen.
+        </p>
+
         <ErrorMessage />
 
         <form @submit.prevent="handleSubmit">
@@ -56,5 +64,9 @@ const handleSubmit = async () => {
 
             <button type="submit" :disabled="submitting">Inloggen</button>
         </form>
+
+        <p>
+            <RouterLink :to="{ name: 'auth.register' }">Nog geen account? Registreren</RouterLink>
+        </p>
     </main>
 </template>

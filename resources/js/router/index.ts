@@ -30,7 +30,7 @@ router.beforeEach(async to => {
         return { name: 'tickets.overview' };
     }
 
-    if (to.name === 'auth.login' && authStore.getters.isAuthenticated.value) {
+    if ((to.name === 'auth.login' || to.name === 'auth.register') && authStore.getters.isAuthenticated.value) {
         return { name: 'tickets.overview' };
     }
 

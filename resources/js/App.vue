@@ -16,7 +16,7 @@ const handleLogout = async () => {
 </script>
 
 <template>
-    <header v-if="isAuthenticated && route.name !== 'auth.login'">
+    <header v-if="isAuthenticated && route.name !== 'auth.login' && route.name !== 'auth.register'">
         <nav>
             <RouterLink :to="{ name: 'tickets.overview' }">Tickets</RouterLink>
             <template v-if="isAdmin">
