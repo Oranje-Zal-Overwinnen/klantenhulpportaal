@@ -12,3 +12,5 @@ export interface User {
 }
 
 export const userStore = storeModuleFactory<User>('users');
+
+export type UserFormData = Pick<User, 'first_name' | 'last_name' | 'email' | 'role' | 'phone_number'>;

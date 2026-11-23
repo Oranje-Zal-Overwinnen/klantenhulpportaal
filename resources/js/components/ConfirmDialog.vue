@@ -6,10 +6,12 @@ const props = withDefaults(
         open: boolean;
         title?: string;
         confirmLabel?: string;
+        busy?: boolean;
     }>(),
     {
         title: 'Bevestigen',
-        confirmLabel: 'Bevestigen'
+        confirmLabel: 'Bevestigen',
+        busy: false
     }
 );
 
@@ -41,8 +43,8 @@ watch(() => props.open, sync, { flush: 'post' });
         <h2>{{ title }}</h2>
         <slot />
         <menu>
-            <button type="button" @click="emit('cancel')">Annuleren</button>
-            <button type="button" @click="emit('confirm')">{{ confirmLabel }}</button>
+            <button type="button" :disabled="busy" @click="emit('cancel')">Annuleren</button>
+            <button type="button" :disabled="busy" @click="emit('confirm')">{{ confirmLabel }}</button>
         </menu>
     </dialog>
 </template>
