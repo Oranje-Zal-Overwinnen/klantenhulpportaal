@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { computed, ref } from 'vue';
 import { getRequest, postRequest } from '@/services/http';
 
@@ -27,6 +28,12 @@ const actions = {
     fetchUser: async () => {
         try {
             const { data } = await getRequest<AuthUser | { data: AuthUser }>('/user');
+
+            if (!data) {
+                user.value = null;
+                return false;
+            }
+
             user.value = 'data' in data ? data.data : data;
             return true;
         } catch {
@@ -35,6 +42,7 @@ const actions = {
         }
     },
     login: async (credentials: Credentials) => {
+        await axios.get('/sanctum/csrf-cookie');
         await postRequest('/login', credentials);
         return actions.fetchUser();
     },
@@ -42,7 +50,7 @@ const actions = {
         try {
             await postRequest('/logout', {});
         } catch {
-            // De sessie kan al verlopen zijn; lokaal always uitloggen.
+            // De sessie kan al verlopen zijn; lokaal alsnog uitloggen.
         } finally {
             user.value = null;
         }
