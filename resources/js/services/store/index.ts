@@ -1,5 +1,5 @@
 import { ref, computed, type Ref } from 'vue';
-import { getRequest, postRequest, deleteRequest, putRequest } from '../http';
+import { getRequest, postRequest, deleteRequest, putRequest } from '@/services/http';
 
 type State<T extends { id: number }> = Ref<{ [id: number]: Readonly<T> }>;
 
@@ -25,17 +25,17 @@ export const storeModuleFactory = <T extends { id: number }>(moduleName: string)
 
     const actions = {
         getAll: async (params?: Record<string, unknown>) => {
-            const { data: res } = await getRequest(moduleName, params ? { params } : undefined);
+            const { data: res } = await getRequest<{ data: T[] }>(moduleName, params ? { params } : undefined);
             if (!res) return;
             setters.setAll(res.data);
         },
         create: async (item: New<T>) => {
-            const { data: req } = await postRequest(moduleName, item);
+            const { data: req } = await postRequest<{ data: T[] }>(moduleName, item);
             if (!req) return;
             setters.setAll(req.data);
         },
         update: async (id: number, item: Updatable<T>) => {
-            const { data: req } = await putRequest(`${moduleName}/${id}`, item);
+            const { data: req } = await putRequest<{ data: T[] }>(`${moduleName}/${id}`, item);
             if (!req) return;
             setters.setAll(req.data);
         },
@@ -44,7 +44,7 @@ export const storeModuleFactory = <T extends { id: number }>(moduleName: string)
                 await deleteRequest(`${moduleName}/${id}`, params ? { params } : undefined);
                 setters.deleteById(id);
                 return true;
-            } catch (error) {
+            } catch {
                 return false;
             }
         }

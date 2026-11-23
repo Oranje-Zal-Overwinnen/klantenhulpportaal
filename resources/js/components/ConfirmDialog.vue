@@ -1,0 +1,48 @@
+<script setup lang="ts">
+import { onMounted, ref, watch } from 'vue';
+
+const props = withDefaults(
+    defineProps<{
+        open: boolean;
+        title?: string;
+        confirmLabel?: string;
+    }>(),
+    {
+        title: 'Bevestigen',
+        confirmLabel: 'Bevestigen'
+    }
+);
+
+const emit = defineEmits<{
+    confirm: [];
+    cancel: [];
+}>();
+
+const dialog = ref<HTMLDialogElement | null>(null);
+
+const sync = () => {
+    if (!dialog.value) return;
+
+    if (props.open && !dialog.value.open) {
+        dialog.value.showModal();
+    }
+
+    if (!props.open && dialog.value.open) {
+        dialog.value.close();
+    }
+};
+
+onMounted(sync);
+watch(() => props.open, sync, { flush: 'post' });
+</script>
+
+<template>
+    <dialog ref="dialog" @cancel.prevent="emit('cancel')">
+        <h2>{{ title }}</h2>
+        <slot />
+        <menu>
+            <button type="button" @click="emit('cancel')">Annuleren</button>
+            <button type="button" @click="emit('confirm')">{{ confirmLabel }}</button>
+        </menu>
+    </dialog>
+</template>

@@ -1,2 +1,10 @@
+import Overview from './pages/Overview.vue';
 
-export const ticketRoutes = [];
+export const ticketRoutes = [
+    {
+        path: '/tickets',
+        component: Overview,
+        name: 'tickets.overview',
+        meta: { requiresAuth: true }
+    }
+];
