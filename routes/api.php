@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Resources\UserResource;
@@ -32,6 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::patch('/tickets/{ticket}/assignment', [TicketController::class, 'assign']);
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
+    Route::post('/tickets/{ticket}/replies', [ReplyController::class, 'store']);
+    Route::put('/replies/{reply}', [ReplyController::class, 'update']);
 
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);

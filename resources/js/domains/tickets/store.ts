@@ -78,6 +78,30 @@ export const ticketStore = {
             factory.setters.setAll([ticket]);
 
             return ticket;
+        },
+        createReply: async (ticketId: number, body: string) => {
+            const { data } = await postRequest<Ticket | { data: Ticket }>(`/tickets/${ticketId}/replies`, {
+                body
+            });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
+        },
+        updateReply: async (replyId: number, body: string) => {
+            const { data } = await putRequest<Ticket | { data: Ticket }>(`/replies/${replyId}`, {
+                body
+            });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
         }
     }
 };

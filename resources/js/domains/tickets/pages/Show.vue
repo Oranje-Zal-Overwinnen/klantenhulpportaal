@@ -2,7 +2,9 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ErrorMessage from '@/components/ErrorMessage.vue';
+import FormError from '@/components/FormError.vue';
 import { authStore } from '@/domains/auth/store';
+import type { Reply } from '@/domains/replies/store';
 import { categoryNames, formatDate, fullName, statusLabel } from '@/domains/tickets/helpers';
 import { ticketStore, type Ticket } from '@/domains/tickets/store';
 import { userStore } from '@/domains/users/store';
@@ -17,6 +19,11 @@ const assigning = ref(false);
 const selectedStatus = ref<Ticket['status']>('pending');
 const updatingStatus = ref(false);
 const statuses: Ticket['status'][] = ['pending', 'in_progress', 'resolved'];
+const replyBody = ref('');
+const submittingReply = ref(false);
+const editingReplyId = ref<number | null>(null);
+const editingReplyBody = ref('');
+const savingReply = ref(false);
 
 const canEdit = computed(() => {
     if (!ticket.value || !currentUser.value) return false;
@@ -75,6 +82,46 @@ const updateStatus = async () => {
         // De foutmelding wordt via de HTTP-service gezet.
     } finally {
         updatingStatus.value = false;
+    }
+};
+
+const addReply = async () => {
+    if (!ticket.value) return;
+
+    submittingReply.value = true;
+
+    try {
+        await ticketStore.actions.createReply(ticket.value.id, replyBody.value);
+        replyBody.value = '';
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        submittingReply.value = false;
+    }
+};
+
+const startEditReply = (reply: Reply) => {
+    editingReplyId.value = reply.id;
+    editingReplyBody.value = reply.body;
+};
+
+const cancelEditReply = () => {
+    editingReplyId.value = null;
+    editingReplyBody.value = '';
+};
+
+const saveReply = async () => {
+    if (editingReplyId.value === null) return;
+
+    savingReply.value = true;
+
+    try {
+        await ticketStore.actions.updateReply(editingReplyId.value, editingReplyBody.value);
+        cancelEditReply();
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        savingReply.value = false;
     }
 };
 </script>
@@ -155,9 +202,38 @@ const updateStatus = async () => {
             <ul v-else>
                 <li v-for="reply in ticket.replies" :key="reply.id">
                     <p>{{ fullName(reply.author) }} - {{ formatDate(reply.created_at) }}</p>
-                    <p>{{ reply.body }}</p>
+
+                    <template v-if="editingReplyId === reply.id">
+                        <p>
+                            <label :for="'reply-' + reply.id">Reactie</label>
+                            <textarea :id="'reply-' + reply.id" v-model="editingReplyBody" rows="3"></textarea>
+                        </p>
+                        <FormError name="body" />
+
+                        <button type="button" :disabled="savingReply" @click="saveReply">Opslaan</button>
+                        <button type="button" :disabled="savingReply" @click="cancelEditReply">Annuleren</button>
+                    </template>
+
+                    <template v-else>
+                        <p>{{ reply.body }}</p>
+                        <button v-if="isAdmin" type="button" @click="startEditReply(reply)">Bewerk</button>
+                    </template>
                 </li>
             </ul>
+
+            <section v-if="isAdmin && editingReplyId === null">
+                <h3>Reactie toevoegen</h3>
+
+                <form @submit.prevent="addReply">
+                    <p>
+                        <label for="reply_body">Reactie</label>
+                        <textarea id="reply_body" v-model="replyBody" rows="3" required></textarea>
+                    </p>
+                    <FormError name="body" />
+
+                    <button type="submit" :disabled="submittingReply">Reactie plaatsen</button>
+                </form>
+            </section>
         </template>
 
         <p v-else-if="loaded">Ticket niet gevonden of je hebt geen toegang.</p>
