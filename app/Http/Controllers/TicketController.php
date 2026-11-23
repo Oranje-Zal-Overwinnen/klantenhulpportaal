@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AssignTicketRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
+use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
@@ -44,6 +45,15 @@ class TicketController extends Controller
     {
         $ticket->update([
             'assigned_to' => $request->input('assigned_to'),
+        ]);
+
+        return $this->detailTicket($ticket);
+    }
+
+    public function updateStatus(UpdateTicketStatusRequest $request, Ticket $ticket)
+    {
+        $ticket->update([
+            'status' => $request->validated('status'),
         ]);
 
         return $this->detailTicket($ticket);

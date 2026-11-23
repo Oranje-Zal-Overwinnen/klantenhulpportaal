@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 import { authStore } from '@/domains/auth/store';
 import { categoryNames, formatDate, fullName, statusLabel } from '@/domains/tickets/helpers';
-import { ticketStore } from '@/domains/tickets/store';
+import { ticketStore, type Ticket } from '@/domains/tickets/store';
 import { userStore } from '@/domains/users/store';
 
 const route = useRoute();
@@ -14,6 +14,9 @@ const currentUser = authStore.getters.user;
 const loaded = ref(false);
 const selectedAdmin = ref<number | null>(null);
 const assigning = ref(false);
+const selectedStatus = ref<Ticket['status']>('pending');
+const updatingStatus = ref(false);
+const statuses: Ticket['status'][] = ['pending', 'in_progress', 'resolved'];
 
 const canEdit = computed(() => {
     if (!ticket.value || !currentUser.value) return false;
@@ -21,7 +24,7 @@ const canEdit = computed(() => {
     return currentUser.value.role === 'admin' || ticket.value.user_id === currentUser.value.id;
 });
 
-const canAssign = computed(() => currentUser.value?.role === 'admin');
+const isAdmin = computed(() => currentUser.value?.role === 'admin');
 
 const admins = computed(() =>
     Object.values(userStore.getters.all.value)
@@ -35,8 +38,9 @@ onMounted(async () => {
     try {
         await ticketStore.actions.fetchTicket(ticketId);
         selectedAdmin.value = ticket.value?.assigned_to ?? null;
+        selectedStatus.value = ticket.value?.status ?? 'pending';
 
-        if (canAssign.value) {
+        if (isAdmin.value) {
             await userStore.actions.getAll();
         }
     } catch {
@@ -57,6 +61,20 @@ const assign = async () => {
         // De foutmelding wordt via de HTTP-service gezet.
     } finally {
         assigning.value = false;
+    }
+};
+
+const updateStatus = async () => {
+    if (!ticket.value) return;
+
+    updatingStatus.value = true;
+
+    try {
+        await ticketStore.actions.updateStatus(ticket.value.id, selectedStatus.value);
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        updatingStatus.value = false;
     }
 };
 </script>
@@ -99,7 +117,7 @@ const assign = async () => {
                 <dd>{{ fullName(ticket.assignee) }}</dd>
             </dl>
 
-            <section v-if="canAssign">
+            <section v-if="isAdmin">
                 <h2>Toewijzen</h2>
 
                 <p>
@@ -113,6 +131,21 @@ const assign = async () => {
                 </p>
 
                 <button type="button" :disabled="assigning" @click="assign">Toewijzen</button>
+            </section>
+
+            <section v-if="isAdmin">
+                <h2>Status wijzigen</h2>
+
+                <p>
+                    <label for="status">Status</label>
+                    <select id="status" v-model="selectedStatus">
+                        <option v-for="status in statuses" :key="status" :value="status">
+                            {{ statusLabel(status) }}
+                        </option>
+                    </select>
+                </p>
+
+                <button type="button" :disabled="updatingStatus" @click="updateStatus">Status opslaan</button>
             </section>
 
             <h2>Reacties</h2>

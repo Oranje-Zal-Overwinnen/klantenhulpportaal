@@ -66,6 +66,18 @@ export const ticketStore = {
             factory.setters.setAll([ticket]);
 
             return ticket;
+        },
+        updateStatus: async (id: number, status: Ticket['status']) => {
+            const { data } = await patchRequest<Ticket | { data: Ticket }>(`/tickets/${id}/status`, {
+                status
+            });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
         }
     }
 };

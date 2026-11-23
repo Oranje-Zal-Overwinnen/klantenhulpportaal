@@ -25,6 +25,13 @@ export interface RegisterData {
     password_confirmation: string;
 }
 
+export interface ResetPasswordData {
+    token: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
+
 const user = ref<AuthUser | null>(null);
 
 const getters = {
@@ -53,6 +60,18 @@ const actions = {
     register: async (data: RegisterData) => {
         await axios.get('/sanctum/csrf-cookie');
         return postRequest('/register', data);
+    },
+    forgotPassword: async (email: string) => {
+        await axios.get('/sanctum/csrf-cookie');
+        const { data } = await postRequest<{ message: string }>('/forgot-password', { email });
+
+        return data.message;
+    },
+    resetPassword: async (payload: ResetPasswordData) => {
+        await axios.get('/sanctum/csrf-cookie');
+        const { data } = await postRequest<{ message: string }>('/reset-password', payload);
+
+        return data.message;
     },
     login: async (credentials: Credentials) => {
         await axios.get('/sanctum/csrf-cookie');

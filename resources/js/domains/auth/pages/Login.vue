@@ -47,6 +47,10 @@ const handleSubmit = async () => {
             Je e-mailadres is bevestigd. Je kunt nu inloggen.
         </p>
 
+        <p v-if="route.query.reset === '1'">
+            Je wachtwoord is aangepast. Je kunt nu inloggen.
+        </p>
+
         <ErrorMessage />
 
         <form @submit.prevent="handleSubmit">
@@ -67,6 +71,8 @@ const handleSubmit = async () => {
 
         <p>
             <RouterLink :to="{ name: 'auth.register' }">Nog geen account? Registreren</RouterLink>
+            |
+            <RouterLink :to="{ name: 'auth.forgot-password' }">Wachtwoord vergeten?</RouterLink>
         </p>
     </main>
 </template>
