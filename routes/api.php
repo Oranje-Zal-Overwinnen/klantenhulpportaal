@@ -33,6 +33,10 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::patch('/tickets/{ticket}/assignment', [TicketController::class, 'assign']);
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
 
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
     Route::get('/users', [UserController::class, 'index']);
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);

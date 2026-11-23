@@ -22,6 +22,8 @@ const handleLogout = async () => {
             <template v-if="isAdmin">
                 <span> | </span>
                 <RouterLink :to="{ name: 'users.overview' }">Gebruikers</RouterLink>
+                <span> | </span>
+                <RouterLink :to="{ name: 'categories.overview' }">Categorieën</RouterLink>
             </template>
         </nav>
 
