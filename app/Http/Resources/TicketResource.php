@@ -25,6 +25,7 @@ class TicketResource extends JsonResource
             'assignee' => $this->whenLoaded('assignee', fn () => $this->assignee ? new UserResource($this->assignee) : null),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
             'replies' => ReplyResource::collection($this->whenLoaded('replies')),
+            'notes' => NoteResource::collection($this->whenLoaded('notes')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

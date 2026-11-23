@@ -1,6 +1,7 @@
 import { storeModuleFactory } from '@/services/store';
-import { getRequest, patchRequest, postRequest, putRequest } from '@/services/http';
+import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/services/http';
 import type { Category } from '@/domains/categories/store';
+import type { Note } from '@/domains/notes/store';
 import type { Reply } from '@/domains/replies/store';
 import type { User } from '@/domains/users/store';
 
@@ -15,6 +16,7 @@ export interface Ticket {
     assignee?: User | null;
     categories?: Category[];
     replies?: Reply[];
+    notes?: Note[];
     created_at?: string;
     updated_at?: string;
 }
@@ -95,6 +97,40 @@ export const ticketStore = {
             const { data } = await putRequest<Ticket | { data: Ticket }>(`/replies/${replyId}`, {
                 body
             });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
+        },
+        createNote: async (ticketId: number, body: string) => {
+            const { data } = await postRequest<Ticket | { data: Ticket }>(`/tickets/${ticketId}/notes`, {
+                body
+            });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
+        },
+        updateNote: async (noteId: number, body: string) => {
+            const { data } = await putRequest<Ticket | { data: Ticket }>(`/notes/${noteId}`, {
+                body
+            });
+
+            if (!data) return null;
+
+            const ticket = 'data' in data ? data.data : data;
+            factory.setters.setAll([ticket]);
+
+            return ticket;
+        },
+        deleteNote: async (noteId: number) => {
+            const { data } = await deleteRequest<Ticket | { data: Ticket }>(`/notes/${noteId}`);
 
             if (!data) return null;
 

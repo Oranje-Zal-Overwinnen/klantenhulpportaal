@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\LoadsTicketDetail;
 use App\Http\Requests\AssignTicketRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
+    use LoadsTicketDetail;
+
     public function index(Request $request)
     {
         return $this->allTickets($request);
@@ -89,17 +92,5 @@ class TicketController extends Controller
             ->get();
 
         return TicketResource::collection($tickets);
-    }
-
-    private function detailTicket(Ticket $ticket)
-    {
-        $ticket->load([
-            'creator',
-            'assignee',
-            'categories',
-            'replies' => fn ($query) => $query->with('author')->oldest('created_at'),
-        ]);
-
-        return new TicketResource($ticket);
     }
 }

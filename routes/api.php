@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TicketController;
@@ -35,6 +36,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
     Route::post('/tickets/{ticket}/replies', [ReplyController::class, 'store']);
     Route::put('/replies/{reply}', [ReplyController::class, 'update']);
+    Route::post('/tickets/{ticket}/notes', [NoteController::class, 'store']);
+    Route::put('/notes/{note}', [NoteController::class, 'update']);
+    Route::delete('/notes/{note}', [NoteController::class, 'destroy']);
 
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);

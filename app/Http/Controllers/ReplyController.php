@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\LoadsTicketDetail;
 use App\Http\Requests\StoreReplyRequest;
 use App\Http\Requests\UpdateReplyRequest;
-use App\Http\Resources\TicketResource;
 use App\Models\Reply;
 use App\Models\Ticket;
 use App\Notifications\TicketReplyNotification;
 
 class ReplyController extends Controller
 {
+    use LoadsTicketDetail;
+
     public function store(StoreReplyRequest $request, Ticket $ticket)
     {
         $reply = $ticket->replies()->create([
@@ -29,7 +31,7 @@ class ReplyController extends Controller
             $ticket->creator->notify(new TicketReplyNotification($ticket, $reply));
         }
 
-        return $this->ticketDetail($ticket);
+        return $this->detailTicket($ticket);
     }
 
     public function update(UpdateReplyRequest $request, Reply $reply)
@@ -41,18 +43,6 @@ class ReplyController extends Controller
         $ticket = $reply->ticket;
         $ticket->touch();
 
-        return $this->ticketDetail($ticket);
-    }
-
-    private function ticketDetail(Ticket $ticket)
-    {
-        $ticket->load([
-            'creator',
-            'assignee',
-            'categories',
-            'replies' => fn ($query) => $query->with('author')->oldest('created_at'),
-        ]);
-
-        return new TicketResource($ticket);
+        return $this->detailTicket($ticket);
     }
 }

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 import FormError from '@/components/FormError.vue';
 import { authStore } from '@/domains/auth/store';
+import type { Note } from '@/domains/notes/store';
 import type { Reply } from '@/domains/replies/store';
 import { categoryNames, formatDate, fullName, statusLabel } from '@/domains/tickets/helpers';
 import { ticketStore, type Ticket } from '@/domains/tickets/store';
@@ -24,6 +26,13 @@ const submittingReply = ref(false);
 const editingReplyId = ref<number | null>(null);
 const editingReplyBody = ref('');
 const savingReply = ref(false);
+const noteBody = ref('');
+const submittingNote = ref(false);
+const editingNoteId = ref<number | null>(null);
+const editingNoteBody = ref('');
+const savingNote = ref(false);
+const pendingDeleteNote = ref<Readonly<Note> | null>(null);
+const deletingNote = ref(false);
 
 const canEdit = computed(() => {
     if (!ticket.value || !currentUser.value) return false;
@@ -124,6 +133,69 @@ const saveReply = async () => {
         savingReply.value = false;
     }
 };
+
+const addNote = async () => {
+    if (!ticket.value) return;
+
+    submittingNote.value = true;
+
+    try {
+        await ticketStore.actions.createNote(ticket.value.id, noteBody.value);
+        noteBody.value = '';
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        submittingNote.value = false;
+    }
+};
+
+const startEditNote = (note: Note) => {
+    editingNoteId.value = note.id;
+    editingNoteBody.value = note.body;
+};
+
+const cancelEditNote = () => {
+    editingNoteId.value = null;
+    editingNoteBody.value = '';
+};
+
+const saveNote = async () => {
+    if (editingNoteId.value === null) return;
+
+    savingNote.value = true;
+
+    try {
+        await ticketStore.actions.updateNote(editingNoteId.value, editingNoteBody.value);
+        cancelEditNote();
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        savingNote.value = false;
+    }
+};
+
+const requestDeleteNote = (note: Readonly<Note>) => {
+    pendingDeleteNote.value = note;
+};
+
+const cancelDeleteNote = () => {
+    pendingDeleteNote.value = null;
+};
+
+const deleteNote = async () => {
+    if (!pendingDeleteNote.value) return;
+
+    deletingNote.value = true;
+
+    try {
+        await ticketStore.actions.deleteNote(pendingDeleteNote.value.id);
+        pendingDeleteNote.value = null;
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        deletingNote.value = false;
+    }
+};
 </script>
 
 <template>
@@ -132,7 +204,7 @@ const saveReply = async () => {
             <RouterLink :to="{ name: 'tickets.overview' }">Terug naar overzicht</RouterLink>
         </p>
 
-        <ErrorMessage />
+        <ErrorMessage v-if="pendingDeleteNote === null" />
 
         <template v-if="ticket">
             <h1>{{ ticket.title }}</h1>
@@ -233,6 +305,58 @@ const saveReply = async () => {
 
                     <button type="submit" :disabled="submittingReply">Reactie plaatsen</button>
                 </form>
+            </section>
+
+            <section v-if="isAdmin">
+                <h2>Notities</h2>
+
+                <p v-if="!ticket.notes?.length">Nog geen notities.</p>
+
+                <ul v-else>
+                    <li v-for="note in ticket.notes" :key="note.id">
+                        <p>{{ fullName(note.author) }} - {{ formatDate(note.created_at) }}</p>
+
+                        <template v-if="editingNoteId === note.id">
+                            <p>
+                                <label :for="'note-' + note.id">Notitie</label>
+                                <textarea :id="'note-' + note.id" v-model="editingNoteBody" rows="3"></textarea>
+                            </p>
+                            <FormError name="body" />
+
+                            <button type="button" :disabled="savingNote" @click="saveNote">Opslaan</button>
+                            <button type="button" :disabled="savingNote" @click="cancelEditNote">Annuleren</button>
+                        </template>
+
+                        <template v-else>
+                            <p>{{ note.body }}</p>
+                            <button type="button" @click="startEditNote(note)">Bewerk</button>
+                            <button type="button" @click="requestDeleteNote(note)">Verwijder</button>
+                        </template>
+                    </li>
+                </ul>
+
+                <form v-if="editingNoteId === null" @submit.prevent="addNote">
+                    <p>
+                        <label for="note_body">Notitie</label>
+                        <textarea id="note_body" v-model="noteBody" rows="3" required></textarea>
+                    </p>
+                    <FormError name="body" />
+
+                    <button type="submit" :disabled="submittingNote">Notitie toevoegen</button>
+                </form>
+
+                <ConfirmDialog
+                    :open="pendingDeleteNote !== null"
+                    :busy="deletingNote"
+                    title="Notitie verwijderen"
+                    confirm-label="Verwijderen"
+                    @cancel="cancelDeleteNote"
+                    @confirm="deleteNote"
+                >
+                    <p v-if="pendingDeleteNote">Weet je zeker dat je deze notitie wilt verwijderen?</p>
+
+                    <ErrorMessage />
+                </ConfirmDialog>
             </section>
         </template>
 
