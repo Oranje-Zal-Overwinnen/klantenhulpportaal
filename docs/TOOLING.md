@@ -68,6 +68,7 @@ Belangrijke afspraken:
 - Inloggen is geblokkeerd zolang `email_verified_at` leeg is. De loginpagina biedt dan de optie om de bevestigingsmail opnieuw te versturen via `POST /api/email/verification-notification`.
 - Auth-endpoints zijn beperkt tot 6 requests per minuut; schrijfacties op de API tot 60 requests per minuut per gebruiker/IP.
 - E-mailnotificaties worden via de queue verstuurd. Start lokaal een worker met `php artisan queue:work`.
+- Na een wachtwoordreset worden bestaande sessies en API-tokens van de gebruiker ingetrokken.
 
 ## Backend-architectuur
 

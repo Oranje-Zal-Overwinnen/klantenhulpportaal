@@ -12,6 +12,7 @@ use App\Notifications\TicketReplyNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\SendQueuedNotifications;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -472,6 +473,16 @@ class AuthorizationTest extends TestCase
         Notification::fake();
 
         $user = User::factory()->create();
+        $user->createToken('existing-token');
+
+        DB::table('sessions')->insert([
+            'id' => 'existing-session',
+            'user_id' => $user->id,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'phpunit',
+            'payload' => '',
+            'last_activity' => now()->timestamp,
+        ]);
 
         $this->postJson('/api/forgot-password', ['email' => $user->email])
             ->assertOk();
@@ -488,6 +499,8 @@ class AuthorizationTest extends TestCase
         ])->assertOk();
 
         $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
+        $this->assertDatabaseMissing('sessions', ['user_id' => $user->id]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
     public function test_password_reset_with_an_invalid_token_fails(): void
