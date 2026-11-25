@@ -74,7 +74,14 @@ const handleSubmit = async () => {
 
             <p>
                 <label for="password_confirmation">Wachtwoord bevestigen</label>
-                <input id="password_confirmation" v-model="form.password_confirmation" type="password" autocomplete="new-password" minlength="8" required />
+                <input
+                    id="password_confirmation"
+                    v-model="form.password_confirmation"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                />
             </p>
 
             <button type="submit" :disabled="submitting">Registreren</button>

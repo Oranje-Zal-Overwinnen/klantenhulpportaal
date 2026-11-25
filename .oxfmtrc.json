@@ -1,0 +1,20 @@
+{
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "arrowParens": "avoid",
+    "endOfLine": "lf",
+    "printWidth": 140,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "none",
+    "sortPackageJson": false,
+    "ignorePatterns": [
+        "vendor",
+        "node_modules",
+        "public/build",
+        "storage",
+        "bootstrap/cache",
+        "composer.lock",
+        "package-lock.json",
+        ".php-cs-fixer.cache"
+    ]
+}

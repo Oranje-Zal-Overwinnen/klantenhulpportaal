@@ -33,6 +33,7 @@
 | Axios | `^1.21` | HTTP-verkeer naar de Laravel API |
 | TypeScript | `^7.0` | Typeveiligheid in de frontend |
 | Vite | `^8.0` | Build tool en dev server |
+| Oxfmt | `^0.80` | JS/TS/Vue/CSS/YAML formatting |
 | Tailwind CSS | `^4.0` | Styling |
 
 ## Frontend-architectuur
@@ -107,6 +108,8 @@ php artisan queue:work
 # Testen en formatting
 php artisan test
 vendor/bin/pint
+npm run format
+npm run format:check
 
 # Productiebuild
 npm run build

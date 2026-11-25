@@ -32,9 +32,7 @@ const handleSubmit = async () => {
 
         if (!result) return;
 
-        const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
-            ? route.query.redirect
-            : null;
+        const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : null;
 
         await router.push(redirect ?? { name: 'tickets.overview' });
     } catch {
@@ -62,25 +60,17 @@ const handleResend = async () => {
     <main>
         <h1>Inloggen</h1>
 
-        <p v-if="route.query.registered === '1'">
-            Registratie gelukt. Controleer je e-mail om je account te bevestigen.
-        </p>
+        <p v-if="route.query.registered === '1'">Registratie gelukt. Controleer je e-mail om je account te bevestigen.</p>
 
-        <p v-if="route.query.verified === '1'">
-            Je e-mailadres is bevestigd. Je kunt nu inloggen.
-        </p>
+        <p v-if="route.query.verified === '1'">Je e-mailadres is bevestigd. Je kunt nu inloggen.</p>
 
-        <p v-if="route.query.reset === '1'">
-            Je wachtwoord is aangepast. Je kunt nu inloggen.
-        </p>
+        <p v-if="route.query.reset === '1'">Je wachtwoord is aangepast. Je kunt nu inloggen.</p>
 
         <ErrorMessage />
 
         <div v-if="needsVerification">
             <p>Vraag hieronder een nieuwe bevestigingsmail aan.</p>
-            <button type="button" :disabled="resending" @click="handleResend">
-                Bevestigingsmail opnieuw versturen
-            </button>
+            <button type="button" :disabled="resending" @click="handleResend">Bevestigingsmail opnieuw versturen</button>
             <p v-if="resendMessage">{{ resendMessage }}</p>
         </div>
 

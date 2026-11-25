@@ -12,9 +12,7 @@ const assigning = ref(false);
 const admins = computed(() =>
     Object.values(userStore.getters.all.value)
         .filter(user => user.role === 'admin')
-        .sort((first, second) =>
-            `${first.last_name} ${first.first_name}`.localeCompare(`${second.last_name} ${second.first_name}`)
-        )
+        .sort((first, second) => `${first.last_name} ${first.first_name}`.localeCompare(`${second.last_name} ${second.first_name}`))
 );
 
 watch(
@@ -54,9 +52,7 @@ const handleSubmit = async () => {
                 <label for="assigned_to">Toegewezen aan</label>
                 <select id="assigned_to" v-model="selectedAdmin">
                     <option :value="null">Niet toegewezen</option>
-                    <option v-for="admin in admins" :key="admin.id" :value="admin.id">
-                        {{ admin.first_name }} {{ admin.last_name }}
-                    </option>
+                    <option v-for="admin in admins" :key="admin.id" :value="admin.id">{{ admin.first_name }} {{ admin.last_name }}</option>
                 </select>
             </p>
             <FormError name="assigned_to" />

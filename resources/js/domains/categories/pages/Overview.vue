@@ -5,9 +5,7 @@ import ErrorMessage from '@/components/ErrorMessage.vue';
 import { categoryStore } from '@/domains/categories/store';
 
 const categories = computed(() =>
-    Object.values(categoryStore.getters.all.value).sort((first, second) =>
-        first.name.localeCompare(second.name)
-    )
+    Object.values(categoryStore.getters.all.value).sort((first, second) => first.name.localeCompare(second.name))
 );
 
 onMounted(async () => {

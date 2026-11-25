@@ -28,11 +28,7 @@ const handleLogout = async () => {
 
             <div v-if="user" class="flex items-center gap-3 text-sm text-slate-500">
                 <span>Ingelogd als {{ user.first_name }} {{ user.last_name }}</span>
-                <button
-                    type="button"
-                    class="border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                    @click="handleLogout"
-                >
+                <button type="button" class="border border-slate-300 bg-white text-slate-700 hover:bg-slate-100" @click="handleLogout">
                     Uitloggen
                 </button>
             </div>

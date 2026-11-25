@@ -15,9 +15,7 @@ const form = ref<TicketFormData>({
 });
 
 const categories = computed(() =>
-    Object.values(categoryStore.getters.all.value).sort((first, second) =>
-        first.name.localeCompare(second.name)
-    )
+    Object.values(categoryStore.getters.all.value).sort((first, second) => first.name.localeCompare(second.name))
 );
 
 onMounted(async () => {
