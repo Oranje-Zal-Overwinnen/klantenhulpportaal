@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Reply;
 use App\Models\Ticket;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TicketReplyNotification extends Notification
+class TicketReplyNotification extends Notification implements ShouldQueue
 {
     public function __construct(
         public Ticket $ticket,
@@ -31,11 +32,11 @@ class TicketReplyNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Nieuwe reactie op je ticket')
-            ->greeting('Hallo ' . $notifiable->first_name . ',')
-            ->line('Er is een nieuwe reactie geplaatst op je ticket "' . $this->ticket->title . '".')
-            ->line('"' . $this->reply->body . '"')
-            ->action('Bekijk ticket', url('/tickets/' . $this->ticket->id))
+            ->greeting('Hallo '.$notifiable->first_name.',')
+            ->line('Er is een nieuwe reactie geplaatst op je ticket "'.$this->ticket->title.'".')
+            ->line('"'.$this->reply->body.'"')
+            ->action('Bekijk ticket', url('/tickets/'.$this->ticket->id))
             ->line('Je kunt het ticket en de reactie bekijken in het Klantenhulpportaal.')
-            ->salutation('Met vriendelijke groet,' . PHP_EOL . 'Klantenhulpportaal');
+            ->salutation('Met vriendelijke groet,'.PHP_EOL.'Klantenhulpportaal');
     }
 }

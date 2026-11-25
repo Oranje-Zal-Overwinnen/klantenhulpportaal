@@ -23,7 +23,7 @@ Dit document beschrijft de toolset die voor het Klantenhulpportaal is gebruikt. 
 | Laravel Pint | `^1.27` | PHP code style |
 | PHPUnit | `^12.5` | Feature- en unit tests |
 | SQLite | standaard via `.env` | Lokale database |
-| MailHog | SMTP `127.0.0.1:1025` | E-mail lokaal afvangen |
+| Mailpit | SMTP `127.0.0.1:1025` | E-mail lokaal afvangen |
 
 ## Frontend
 
@@ -68,6 +68,7 @@ Belangrijke afspraken:
 - Na registratie ontvangt de gebruiker een bevestigingsmail met een ondertekende link.
 - Inloggen is geblokkeerd zolang `email_verified_at` leeg is. De loginpagina biedt dan de optie om de bevestigingsmail opnieuw te versturen via `POST /api/email/verification-notification`.
 - Auth-endpoints zijn beperkt tot 6 requests per minuut; schrijfacties op de API tot 60 requests per minuut per gebruiker/IP.
+- E-mailnotificaties worden via de queue verstuurd. Start lokaal een worker met `php artisan queue:work`.
 
 ## Backend-architectuur
 
@@ -99,6 +100,9 @@ php artisan migrate --seed
 # Developen
 php artisan serve
 npm run dev
+
+# E-mails verwerken (verplicht bij queued notifications)
+php artisan queue:work
 
 # Testen en formatting
 php artisan test

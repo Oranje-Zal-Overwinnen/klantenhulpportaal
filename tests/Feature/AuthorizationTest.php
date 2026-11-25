@@ -11,9 +11,11 @@ use App\Notifications\ResetPasswordNotification;
 use App\Notifications\TicketReplyNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -621,5 +623,33 @@ class AuthorizationTest extends TestCase
             ->assertOk();
 
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
+
+    public function test_verification_email_is_queued(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $user->sendEmailVerificationNotification();
+
+        Queue::assertPushed(SendQueuedNotifications::class);
+    }
+
+    public function test_reply_notification_is_queued(): void
+    {
+        Queue::fake();
+
+        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->create();
+        $ticket = $this->ticketFor($owner);
+
+        Sanctum::actingAs($admin);
+
+        $this->postJson("/api/tickets/{$ticket->id}/replies", [
+            'body' => 'We hebben je ticket in behandeling genomen.',
+        ])->assertOk();
+
+        Queue::assertPushed(SendQueuedNotifications::class);
     }
 }
