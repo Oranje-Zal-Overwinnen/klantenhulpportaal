@@ -41,4 +41,22 @@ class UpdateUserRequest extends BaseFormRequest
             'phone_number' => 'nullable|string|max:255',
         ];
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'first_name.required' => 'Vul een voornaam in.',
+            'last_name.required' => 'Vul een achternaam in.',
+            'email.required' => 'Vul een e-mailadres in.',
+            'email.email' => 'Vul een geldig e-mailadres in.',
+            'email.unique' => 'Dit e-mailadres is al in gebruik.',
+            'role.required' => 'Kies een rol.',
+            'role.in' => 'Kies een geldige rol.',
+        ];
+    }
 }

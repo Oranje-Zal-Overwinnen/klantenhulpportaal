@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Form from '../components/Form.vue';
 import { categoryStore } from '@/domains/categories/store';
@@ -7,11 +7,13 @@ import { categoryStore } from '@/domains/categories/store';
 const route = useRoute();
 const router = useRouter();
 
-const categoryId = Number(route.params.id);
-const category = categoryStore.getters.getById(categoryId);
+const categoryId = computed(() => Number(route.params.id));
+const category = computed(() => categoryStore.getters.getById(categoryId.value).value);
 const ready = ref(false);
 
-onMounted(async () => {
+const loadCategories = async () => {
+    ready.value = false;
+
     try {
         await categoryStore.actions.getAll();
     } catch {
@@ -19,11 +21,13 @@ onMounted(async () => {
     } finally {
         ready.value = true;
     }
-});
+};
+
+watch(categoryId, loadCategories, { immediate: true });
 
 const handleSubmit = async (data: { name: string }) => {
     try {
-        await categoryStore.actions.update(categoryId, data);
+        await categoryStore.actions.update(categoryId.value, data);
         await router.push({ name: 'categories.overview' });
     } catch {
         // De foutmelding wordt via de HTTP-service gezet.

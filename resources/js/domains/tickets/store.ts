@@ -1,22 +1,44 @@
 import { storeModuleFactory } from '@/services/store';
 import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/services/http';
 import type { Category } from '@/domains/categories/store';
-import type { Note } from '@/domains/notes/store';
-import type { Reply } from '@/domains/replies/store';
-import type { User } from '@/domains/users/store';
+import type { UserSummary } from '@/domains/users/store';
+
+export type TicketStatus = 'pending' | 'in_progress' | 'resolved';
+
+export const TICKET_STATUSES: TicketStatus[] = ['pending', 'in_progress', 'resolved'];
+
+export interface TicketReply {
+    id: number;
+    ticket_id: number;
+    user_id: number;
+    body: string;
+    author?: UserSummary;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface TicketNote {
+    id: number;
+    ticket_id: number;
+    user_id: number;
+    body: string;
+    author?: UserSummary;
+    created_at?: string;
+    updated_at?: string;
+}
 
 export interface Ticket {
     id: number;
     title: string;
     description: string;
-    status: 'pending' | 'in_progress' | 'resolved';
+    status: TicketStatus;
     user_id: number;
     assigned_to: number | null;
-    creator?: User;
-    assignee?: User | null;
+    creator?: UserSummary;
+    assignee?: UserSummary | null;
     categories?: Category[];
-    replies?: Reply[];
-    notes?: Note[];
+    replies?: TicketReply[];
+    notes?: TicketNote[];
     created_at?: string;
     updated_at?: string;
 }
@@ -27,7 +49,17 @@ export interface TicketFormData {
     categories: number[];
 }
 
+type TicketResponse = Ticket | { data: Ticket };
+
 const factory = storeModuleFactory<Ticket>('tickets');
+
+const applyTicket = (payload: TicketResponse) => {
+    const ticket = 'data' in payload ? payload.data : payload;
+
+    factory.setters.setOne(ticket);
+
+    return ticket;
+};
 
 export const ticketStore = {
     ...factory,
@@ -41,14 +73,13 @@ export const ticketStore = {
             factory.setters.setAll(res.data);
         },
         fetchTicket: async (id: number) => {
-            const { data } = await getRequest<Ticket | { data: Ticket }>(`/tickets/${id}`);
+            factory.setters.reset();
+
+            const { data } = await getRequest<TicketResponse>(`/tickets/${id}`);
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         updateTicket: async (id: number, data: TicketFormData) => {
             const { data: res } = await putRequest<{ data: Ticket[] }>(`/tickets/${id}`, data);
@@ -58,86 +89,71 @@ export const ticketStore = {
             factory.setters.setAll(res.data);
         },
         assignTicket: async (id: number, assignedTo: number | null) => {
-            const { data } = await patchRequest<Ticket | { data: Ticket }>(`/tickets/${id}/assignment`, {
+            const { data } = await patchRequest<TicketResponse>(`/tickets/${id}/assignment`, {
                 assigned_to: assignedTo
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
-        updateStatus: async (id: number, status: Ticket['status']) => {
-            const { data } = await patchRequest<Ticket | { data: Ticket }>(`/tickets/${id}/status`, {
+        updateStatus: async (id: number, status: TicketStatus) => {
+            const { data } = await patchRequest<TicketResponse>(`/tickets/${id}/status`, {
                 status
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         createReply: async (ticketId: number, body: string) => {
-            const { data } = await postRequest<Ticket | { data: Ticket }>(`/tickets/${ticketId}/replies`, {
+            const { data } = await postRequest<TicketResponse>(`/tickets/${ticketId}/replies`, {
                 body
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         updateReply: async (replyId: number, body: string) => {
-            const { data } = await putRequest<Ticket | { data: Ticket }>(`/replies/${replyId}`, {
+            const { data } = await putRequest<TicketResponse>(`/replies/${replyId}`, {
                 body
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         createNote: async (ticketId: number, body: string) => {
-            const { data } = await postRequest<Ticket | { data: Ticket }>(`/tickets/${ticketId}/notes`, {
+            const { data } = await postRequest<TicketResponse>(`/tickets/${ticketId}/notes`, {
                 body
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         updateNote: async (noteId: number, body: string) => {
-            const { data } = await putRequest<Ticket | { data: Ticket }>(`/notes/${noteId}`, {
+            const { data } = await putRequest<TicketResponse>(`/notes/${noteId}`, {
                 body
             });
 
             if (!data) return null;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
-
-            return ticket;
+            return applyTicket(data);
         },
         deleteNote: async (noteId: number) => {
-            const { data } = await deleteRequest<Ticket | { data: Ticket }>(`/notes/${noteId}`);
+            try {
+                const { data } = await deleteRequest<TicketResponse>(`/notes/${noteId}`);
 
-            if (!data) return null;
+                if (!data) return false;
 
-            const ticket = 'data' in data ? data.data : data;
-            factory.setters.setAll([ticket]);
+                applyTicket(data);
 
-            return ticket;
+                return true;
+            } catch {
+                return false;
+            }
         }
     }
 };

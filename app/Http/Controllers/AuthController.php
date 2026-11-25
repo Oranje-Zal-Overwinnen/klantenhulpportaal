@@ -6,7 +6,6 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Notifications\VerifyEmailNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +19,7 @@ class AuthController extends Controller
             'role' => User::ROLE_USER,
         ]);
 
-        $user->notify(new VerifyEmailNotification());
+        $user->sendEmailVerificationNotification();
 
         return response()->json([
             'message' => 'Registratie gelukt. Controleer je e-mail om je account te bevestigen.',

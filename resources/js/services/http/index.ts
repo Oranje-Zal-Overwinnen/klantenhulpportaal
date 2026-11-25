@@ -41,3 +41,4 @@ export const postRequest = <T = unknown, D = unknown>(endpoint: string, data: D)
 export const putRequest = <T = unknown, D = unknown>(endpoint: string, data: D) => http.put<T>(endpoint, data);
 export const patchRequest = <T = unknown, D = unknown>(endpoint: string, data: D) => http.patch<T>(endpoint, data);
 export const deleteRequest = <T = unknown>(endpoint: string, config?: AxiosRequestConfig) => http.delete<T>(endpoint, config);
+export const csrfRequest = () => axios.get('/sanctum/csrf-cookie');

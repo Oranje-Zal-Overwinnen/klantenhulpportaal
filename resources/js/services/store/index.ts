@@ -16,10 +16,18 @@ export const storeModuleFactory = <T extends { id: number }>(moduleName: string)
 
     const setters = {
         setAll: (items: T[]) => {
+            state.value = {};
+
             for (const item of items) state.value[item.id] = Object.freeze(item);
+        },
+        setOne: (item: T) => {
+            state.value[item.id] = Object.freeze(item);
         },
         deleteById: (id: number) => {
             delete state.value[id];
+        },
+        reset: () => {
+            state.value = {};
         }
     };
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Form from '../components/Form.vue';
 import { userStore, type UserFormData } from '@/domains/users/store';
@@ -7,11 +7,13 @@ import { userStore, type UserFormData } from '@/domains/users/store';
 const route = useRoute();
 const router = useRouter();
 
-const userId = Number(route.params.id);
-const user = userStore.getters.getById(userId);
+const userId = computed(() => Number(route.params.id));
+const user = computed(() => userStore.getters.getById(userId.value).value);
 const loaded = ref(false);
 
-onMounted(async () => {
+const loadUser = async () => {
+    loaded.value = false;
+
     if (!user.value) {
         try {
             await userStore.actions.getAll();
@@ -21,11 +23,13 @@ onMounted(async () => {
     }
 
     loaded.value = true;
-});
+};
+
+watch(userId, loadUser, { immediate: true });
 
 const handleSubmit = async (data: UserFormData) => {
     try {
-        await userStore.actions.update(userId, data);
+        await userStore.actions.update(userId.value, data);
         await router.push({ name: 'users.overview' });
     } catch {
         // De foutmelding wordt via de HTTP-service gezet.

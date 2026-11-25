@@ -6,29 +6,28 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Ticket;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', User::class);
+
         return $this->allUsers();
     }
 
     public function update(UpdateUserRequest $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $user->update($request->validated());
 
         return $this->allUsers();
     }
 
-    public function destroy(Request $request, User $user)
+    public function destroy(User $user)
     {
-        if ($request->user()->is($user)) {
-            return response()->json([
-                'message' => 'Je kunt je eigen account niet verwijderen.',
-            ], 422);
-        }
+        $this->authorize('delete', $user);
 
         $unresolvedTickets = Ticket::query()
             ->where('status', '!=', Ticket::STATUS_RESOLVED)

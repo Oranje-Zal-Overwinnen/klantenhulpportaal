@@ -15,6 +15,8 @@ class ReplyController extends Controller
 
     public function store(StoreReplyRequest $request, Ticket $ticket)
     {
+        $this->authorize('create', Reply::class);
+
         $reply = $ticket->replies()->create([
             'user_id' => $request->user()->id,
             'body' => $request->validated('body'),
@@ -23,19 +25,19 @@ class ReplyController extends Controller
         $ticket->touch();
         $ticket->load('creator');
 
-        if (
-            $ticket->creator
-            && ! $ticket->creator->trashed()
-            && $ticket->creator->id !== $request->user()->id
-        ) {
-            $ticket->creator->notify(new TicketReplyNotification($ticket, $reply));
+        $creator = $ticket->creator;
+
+        if ($creator && ! $creator->trashed() && $creator->isNot($request->user())) {
+            $creator->notify(new TicketReplyNotification($ticket, $reply));
         }
 
-        return $this->detailTicket($ticket);
+        return $this->detailTicket($ticket, $request->user());
     }
 
     public function update(UpdateReplyRequest $request, Reply $reply)
     {
+        $this->authorize('update', $reply);
+
         $reply->update([
             'body' => $request->validated('body'),
         ]);
@@ -43,6 +45,6 @@ class ReplyController extends Controller
         $ticket = $reply->ticket;
         $ticket->touch();
 
-        return $this->detailTicket($ticket);
+        return $this->detailTicket($ticket, $request->user());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,5 +61,17 @@ class Ticket extends Model
     public function isResolved(): bool
     {
         return $this->status === self::STATUS_RESOLVED;
+    }
+
+    /**
+     * Limit the query to the tickets the given user is allowed to see.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->where('user_id', $user->id);
     }
 }

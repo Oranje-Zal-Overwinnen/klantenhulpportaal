@@ -11,8 +11,8 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
 Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:6,1');
 Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1');
 
@@ -27,19 +27,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
     Route::put('/tickets/{ticket}', [TicketController::class, 'update']);
-
-    Route::get('/categories', [CategoryController::class, 'index']);
-});
-
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::patch('/tickets/{ticket}/assignment', [TicketController::class, 'assign']);
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
+
     Route::post('/tickets/{ticket}/replies', [ReplyController::class, 'store']);
     Route::put('/replies/{reply}', [ReplyController::class, 'update']);
+
     Route::post('/tickets/{ticket}/notes', [NoteController::class, 'store']);
     Route::put('/notes/{note}', [NoteController::class, 'update']);
     Route::delete('/notes/{note}', [NoteController::class, 'destroy']);
 
+    Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);

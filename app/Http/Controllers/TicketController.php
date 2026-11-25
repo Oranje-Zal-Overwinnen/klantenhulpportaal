@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
@@ -17,66 +18,70 @@ class TicketController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Ticket::class);
+
         return $this->allTickets($request);
     }
 
     public function store(StoreTicketRequest $request)
     {
-        $data = $request->validated();
-        $categoryIds = $data['categories'] ?? [];
-        unset($data['categories']);
+        $this->authorize('create', Ticket::class);
 
-        $data['user_id'] = $request->user()->id;
-        $data['status'] = Ticket::STATUS_PENDING;
+        DB::transaction(function () use ($request) {
+            $ticket = Ticket::create([
+                ...$request->safe()->except('categories'),
+                'user_id' => $request->user()->id,
+                'status' => Ticket::STATUS_PENDING,
+            ]);
 
-        $ticket = Ticket::create($data);
-        $ticket->categories()->sync($categoryIds);
+            $ticket->categories()->sync($request->validated('categories') ?? []);
+        });
 
         return $this->allTickets($request);
     }
 
     public function show(Request $request, Ticket $ticket)
     {
-        if (! $request->user()->isAdmin() && $ticket->user_id !== $request->user()->id) {
-            abort(403, 'Je hebt geen toegang tot dit ticket.');
-        }
+        $this->authorize('view', $ticket);
 
-        return $this->detailTicket($ticket);
+        return $this->detailTicket($ticket, $request->user());
     }
 
     public function assign(AssignTicketRequest $request, Ticket $ticket)
     {
+        $this->authorize('assign', $ticket);
+
         $ticket->update([
-            'assigned_to' => $request->input('assigned_to'),
+            'assigned_to' => $request->validated('assigned_to'),
         ]);
 
-        return $this->detailTicket($ticket);
+        return $this->detailTicket($ticket, $request->user());
     }
 
     public function updateStatus(UpdateTicketStatusRequest $request, Ticket $ticket)
     {
+        $this->authorize('updateStatus', $ticket);
+
         $ticket->update([
             'status' => $request->validated('status'),
         ]);
 
-        return $this->detailTicket($ticket);
+        return $this->detailTicket($ticket, $request->user());
     }
 
     public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
-        if (! $request->user()->isAdmin() && $ticket->user_id !== $request->user()->id) {
-            abort(403, 'Je mag alleen je eigen tickets aanpassen.');
-        }
+        $this->authorize('update', $ticket);
 
-        $data = $request->validated();
-        $categoryIds = $data['categories'] ?? null;
-        unset($data['categories']);
+        DB::transaction(function () use ($request, $ticket) {
+            $ticket->update($request->safe()->except('categories'));
 
-        $ticket->update($data);
+            $categoryIds = $request->validated('categories');
 
-        if ($categoryIds !== null) {
-            $ticket->categories()->sync($categoryIds);
-        }
+            if (is_array($categoryIds)) {
+                $ticket->categories()->sync($categoryIds);
+            }
+        });
 
         return $this->allTickets($request);
     }
@@ -85,10 +90,9 @@ class TicketController extends Controller
     {
         $tickets = Ticket::query()
             ->with(['creator', 'assignee', 'categories'])
-            ->when(! $request->user()->isAdmin(), function ($query) use ($request) {
-                $query->where('user_id', $request->user()->id);
-            })
+            ->visibleTo($request->user())
             ->latest('created_at')
+            ->latest('id')
             ->get();
 
         return TicketResource::collection($tickets);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, useId, watch } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -20,6 +20,7 @@ const emit = defineEmits<{
     cancel: [];
 }>();
 
+const titleId = useId();
 const dialog = ref<HTMLDialogElement | null>(null);
 
 const sync = () => {
@@ -39,8 +40,8 @@ watch(() => props.open, sync, { flush: 'post' });
 </script>
 
 <template>
-    <dialog ref="dialog" @cancel.prevent="emit('cancel')">
-        <h2>{{ title }}</h2>
+    <dialog ref="dialog" :aria-labelledby="titleId" @cancel.prevent="emit('cancel')">
+        <h2 :id="titleId">{{ title }}</h2>
         <slot />
         <menu>
             <button type="button" :disabled="busy" @click="emit('cancel')">Annuleren</button>

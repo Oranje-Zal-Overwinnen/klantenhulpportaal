@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { computed, ref } from 'vue';
-import { getRequest, postRequest } from '@/services/http';
+import { csrfRequest, getRequest, postRequest } from '@/services/http';
 
 export interface AuthUser {
     id: number;
@@ -58,23 +57,23 @@ const actions = {
         }
     },
     register: async (data: RegisterData) => {
-        await axios.get('/sanctum/csrf-cookie');
+        await csrfRequest();
         return postRequest('/register', data);
     },
     forgotPassword: async (email: string) => {
-        await axios.get('/sanctum/csrf-cookie');
+        await csrfRequest();
         const { data } = await postRequest<{ message: string }>('/forgot-password', { email });
 
         return data.message;
     },
     resetPassword: async (payload: ResetPasswordData) => {
-        await axios.get('/sanctum/csrf-cookie');
+        await csrfRequest();
         const { data } = await postRequest<{ message: string }>('/reset-password', payload);
 
         return data.message;
     },
     login: async (credentials: Credentials) => {
-        await axios.get('/sanctum/csrf-cookie');
+        await csrfRequest();
         await postRequest('/login', credentials);
         return actions.fetchUser();
     },

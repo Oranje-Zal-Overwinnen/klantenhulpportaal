@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { authRoutes } from '@/domains/auth/routes';
 import { authStore } from '@/domains/auth/store';
 import { categoryRoutes } from '@/domains/categories/routes';
-import { noteRoutes } from '@/domains/notes/routes';
 import { ticketRoutes } from '@/domains/tickets/routes';
 import { userRoutes } from '@/domains/users/routes';
 
@@ -14,7 +13,6 @@ export const router = createRouter({
         ...ticketRoutes,
         ...userRoutes,
         ...categoryRoutes,
-        ...noteRoutes,
         { path: '/:pathMatch(.*)*', redirect: { name: 'tickets.overview' } }
     ]
 });

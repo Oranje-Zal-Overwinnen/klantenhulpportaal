@@ -1,11 +1,14 @@
 import { storeModuleFactory } from '@/services/store';
 
-export interface User {
+export interface UserSummary {
     id: number;
     first_name: string;
     last_name: string;
-    email: string;
     role: 'user' | 'admin';
+}
+
+export interface User extends UserSummary {
+    email: string;
     phone_number: string | null;
     created_at?: string;
     updated_at?: string;

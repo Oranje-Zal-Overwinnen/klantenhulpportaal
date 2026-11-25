@@ -11,11 +11,15 @@ class CategoryController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Category::class);
+
         return $this->allCategories();
     }
 
     public function store(StoreCategoryRequest $request)
     {
+        $this->authorize('create', Category::class);
+
         Category::create($request->validated());
 
         return $this->allCategories();
@@ -23,6 +27,8 @@ class CategoryController extends Controller
 
     public function update(UpdateCategoryRequest $request, Category $category)
     {
+        $this->authorize('update', $category);
+
         $category->update($request->validated());
 
         return $this->allCategories();
@@ -30,10 +36,14 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->tickets()->exists()) {
+        $this->authorize('delete', $category);
+
+        $ticketsCount = $category->tickets()->count();
+
+        if ($ticketsCount > 0) {
             return response()->json([
                 'message' => 'Deze categorie kan niet worden verwijderd omdat er nog tickets aan gekoppeld zijn.',
-                'tickets_count' => $category->tickets()->count(),
+                'tickets_count' => $ticketsCount,
             ], 422);
         }
 

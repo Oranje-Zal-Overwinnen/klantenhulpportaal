@@ -1,5 +1,5 @@
 import type { Ticket } from './store';
-import type { User } from '@/domains/users/store';
+import type { UserSummary } from '@/domains/users/store';
 
 const statusLabels: Record<Ticket['status'], string> = {
     pending: 'In afwachting',
@@ -11,7 +11,7 @@ export const statusLabel = (status: Ticket['status']) => statusLabels[status] ??
 
 export const formatDate = (value?: string) => (value ? new Date(value).toLocaleString('nl-NL') : '-');
 
-export const fullName = (user?: User | null) =>
+export const fullName = (user?: UserSummary | null) =>
     user ? `${user.first_name} ${user.last_name}` : '-';
 
 export const categoryNames = (ticket: Ticket) =>
