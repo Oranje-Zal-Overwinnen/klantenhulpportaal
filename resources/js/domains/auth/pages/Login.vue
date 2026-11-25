@@ -13,14 +13,24 @@ const form = ref({
     password: ''
 });
 const submitting = ref(false);
+const needsVerification = ref(false);
+const resending = ref(false);
+const resendMessage = ref('');
 
 const handleSubmit = async () => {
     submitting.value = true;
+    needsVerification.value = false;
+    resendMessage.value = '';
 
     try {
-        const loggedIn = await authStore.actions.login(form.value);
+        const result = await authStore.actions.login(form.value);
 
-        if (!loggedIn) return;
+        if (result === 'unverified') {
+            needsVerification.value = true;
+            return;
+        }
+
+        if (!result) return;
 
         const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
             ? route.query.redirect
@@ -31,6 +41,19 @@ const handleSubmit = async () => {
         // De foutmelding wordt via de HTTP-service gezet.
     } finally {
         submitting.value = false;
+    }
+};
+
+const handleResend = async () => {
+    resending.value = true;
+    resendMessage.value = '';
+
+    try {
+        resendMessage.value = await authStore.actions.resendVerification(form.value.email);
+    } catch {
+        // De foutmelding wordt via de HTTP-service gezet.
+    } finally {
+        resending.value = false;
     }
 };
 </script>
@@ -52,6 +75,14 @@ const handleSubmit = async () => {
         </p>
 
         <ErrorMessage />
+
+        <div v-if="needsVerification">
+            <p>Vraag hieronder een nieuwe bevestigingsmail aan.</p>
+            <button type="button" :disabled="resending" @click="handleResend">
+                Bevestigingsmail opnieuw versturen
+            </button>
+            <p v-if="resendMessage">{{ resendMessage }}</p>
+        </div>
 
         <form @submit.prevent="handleSubmit">
             <p>

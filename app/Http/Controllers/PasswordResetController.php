@@ -9,12 +9,17 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PasswordResetController extends Controller
 {
     public function sendLink(ForgotPasswordRequest $request): JsonResponse
     {
-        Password::sendResetLink($request->only('email'));
+        try {
+            Password::sendResetLink($request->only('email'));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
 
         return response()->json([
             'message' => 'Als dit e-mailadres bij ons bekend is, ontvang je een e-mail met een resetlink.',

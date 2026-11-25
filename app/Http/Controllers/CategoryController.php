@@ -6,6 +6,7 @@ use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -38,7 +39,22 @@ class CategoryController extends Controller
     {
         $this->authorize('delete', $category);
 
-        $ticketsCount = $category->tickets()->count();
+        $ticketsCount = DB::transaction(function () use ($category) {
+            $lockedCategory = Category::query()
+                ->whereKey($category->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $ticketsCount = $lockedCategory->tickets()->count();
+
+            if ($ticketsCount > 0) {
+                return $ticketsCount;
+            }
+
+            $lockedCategory->delete();
+
+            return 0;
+        });
 
         if ($ticketsCount > 0) {
             return response()->json([
@@ -46,8 +62,6 @@ class CategoryController extends Controller
                 'tickets_count' => $ticketsCount,
             ], 422);
         }
-
-        $category->delete();
 
         return response()->json([
             'message' => 'Categorie succesvol verwijderd.',

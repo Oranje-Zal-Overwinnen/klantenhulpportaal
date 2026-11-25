@@ -501,4 +501,125 @@ class AuthorizationTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonPath('message', 'De resetlink is ongeldig of verlopen.');
     }
+
+    public function test_unverified_user_cannot_login(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $this->withHeader('Origin', 'http://localhost')
+            ->postJson('/api/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ])
+            ->assertForbidden()
+            ->assertJsonPath('code', 'email_unverified');
+
+        $this->assertGuest();
+    }
+
+    public function test_unverified_user_can_request_a_new_verification_email(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $this->postJson('/api/email/verification-notification', [
+            'email' => $user->email,
+        ])->assertOk();
+
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
+    }
+
+    public function test_verification_resend_is_generic_for_unknown_email(): void
+    {
+        Notification::fake();
+
+        $this->postJson('/api/email/verification-notification', [
+            'email' => 'unknown@example.com',
+        ])->assertOk();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_verified_user_is_not_sent_another_verification_email(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        $this->postJson('/api/email/verification-notification', [
+            'email' => $user->email,
+        ])->assertOk();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_last_admin_cannot_demote_themselves(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        Sanctum::actingAs($admin);
+
+        $this->putJson("/api/users/{$admin->id}", [
+            'first_name' => $admin->first_name,
+            'last_name' => $admin->last_name,
+            'email' => $admin->email,
+            'role' => User::ROLE_USER,
+            'phone_number' => $admin->phone_number,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Er moet minimaal één administrator actief blijven.');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $admin->id,
+            'role' => User::ROLE_ADMIN,
+        ]);
+    }
+
+    public function test_admin_can_demote_themselves_when_another_admin_exists(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->admin()->create();
+
+        Sanctum::actingAs($admin);
+
+        $this->putJson("/api/users/{$admin->id}", [
+            'first_name' => $admin->first_name,
+            'last_name' => $admin->last_name,
+            'email' => $admin->email,
+            'role' => User::ROLE_USER,
+            'phone_number' => $admin->phone_number,
+        ])->assertOk();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $admin->id,
+            'role' => User::ROLE_USER,
+        ]);
+    }
+
+    public function test_admin_can_delete_another_admin_when_one_remains(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+
+        Sanctum::actingAs($actor);
+
+        $this->deleteJson("/api/users/{$target->id}")
+            ->assertOk();
+
+        $this->assertSoftDeleted('users', ['id' => $target->id]);
+    }
+
+    public function test_category_can_be_deleted_when_no_tickets_are_linked(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = Category::factory()->create();
+
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson("/api/categories/{$category->id}")
+            ->assertOk();
+
+        $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
 }

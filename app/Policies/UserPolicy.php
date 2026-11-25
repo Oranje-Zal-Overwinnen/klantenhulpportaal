@@ -36,6 +36,10 @@ class UserPolicy
             return Response::deny('Je kunt je eigen account niet verwijderen.');
         }
 
+        if ($target->isLastAdmin()) {
+            return Response::deny('Er moet minimaal één administrator actief blijven.');
+        }
+
         return true;
     }
 

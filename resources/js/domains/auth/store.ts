@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { csrfRequest, getRequest, postRequest } from '@/services/http';
+import { csrfRequest, getRequest, hasErrorCode, postRequest } from '@/services/http';
 
 export interface AuthUser {
     id: number;
@@ -72,9 +72,25 @@ const actions = {
 
         return data.message;
     },
+    resendVerification: async (email: string) => {
+        await csrfRequest();
+        const { data } = await postRequest<{ message: string }>('/email/verification-notification', { email });
+
+        return data.message;
+    },
     login: async (credentials: Credentials) => {
         await csrfRequest();
-        await postRequest('/login', credentials);
+
+        try {
+            await postRequest('/login', credentials);
+        } catch (error) {
+            if (hasErrorCode(error, 'email_unverified')) {
+                return 'unverified' as const;
+            }
+
+            throw error;
+        }
+
         return actions.fetchUser();
     },
     logout: async () => {

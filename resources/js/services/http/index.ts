@@ -42,3 +42,9 @@ export const putRequest = <T = unknown, D = unknown>(endpoint: string, data: D) 
 export const patchRequest = <T = unknown, D = unknown>(endpoint: string, data: D) => http.patch<T>(endpoint, data);
 export const deleteRequest = <T = unknown>(endpoint: string, config?: AxiosRequestConfig) => http.delete<T>(endpoint, config);
 export const csrfRequest = () => axios.get('/sanctum/csrf-cookie');
+
+export const hasErrorCode = (error: unknown, code: string): boolean => {
+    if (!axios.isAxiosError(error)) return false;
+
+    return (error.response?.data as { code?: string } | undefined)?.code === code;
+};

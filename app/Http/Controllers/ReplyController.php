@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateReplyRequest;
 use App\Models\Reply;
 use App\Models\Ticket;
 use App\Notifications\TicketReplyNotification;
+use Throwable;
 
 class ReplyController extends Controller
 {
@@ -28,7 +29,11 @@ class ReplyController extends Controller
         $creator = $ticket->creator;
 
         if ($creator && ! $creator->trashed() && $creator->isNot($request->user())) {
-            $creator->notify(new TicketReplyNotification($ticket, $reply));
+            try {
+                $creator->notify(new TicketReplyNotification($ticket, $reply));
+            } catch (Throwable $exception) {
+                report($exception);
+            }
         }
 
         return $this->detailTicket($ticket, $request->user());

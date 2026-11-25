@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use MustVerifyEmailTrait;
     use Notifiable;
     use SoftDeletes;
@@ -48,6 +49,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isLastAdmin(): bool
+    {
+        if (! $this->isAdmin()) {
+            return false;
+        }
+
+        return ! static::query()
+            ->where('role', self::ROLE_ADMIN)
+            ->whereKeyNot($this->getKey())
+            ->exists();
     }
 
     public function sendPasswordResetNotification($token): void

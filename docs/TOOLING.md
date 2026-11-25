@@ -62,6 +62,13 @@ Belangrijke afspraken:
 - `services/http` is de enige plek waar Axios wordt geconfigureerd.
 - Foutmeldingen worden centraal gezet door de Axios-response-interceptor en getoond via `ErrorMessage`/`FormError`.
 
+## Authenticatie
+
+- SPA-authenticatie verloopt via Sanctum (`auth:sanctum` + `statefulApi()`).
+- Na registratie ontvangt de gebruiker een bevestigingsmail met een ondertekende link.
+- Inloggen is geblokkeerd zolang `email_verified_at` leeg is. De loginpagina biedt dan de optie om de bevestigingsmail opnieuw te versturen via `POST /api/email/verification-notification`.
+- Auth-endpoints zijn beperkt tot 6 requests per minuut; schrijfacties op de API tot 60 requests per minuut per gebruiker/IP.
+
 ## Backend-architectuur
 
 ```text
