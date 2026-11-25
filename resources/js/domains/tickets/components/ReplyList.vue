@@ -47,8 +47,8 @@ const saveReply = async () => {
 
         <p v-if="!replies.length">Nog geen reacties.</p>
 
-        <ul v-else>
-            <li v-for="reply in replies" :key="reply.id">
+        <ul v-else class="mt-3 space-y-3">
+            <li v-for="reply in replies" :key="reply.id" class="rounded-md border border-slate-200 bg-white p-3">
                 <p>{{ fullName(reply.author) }} - {{ formatDate(reply.created_at) }}</p>
 
                 <template v-if="editingReplyId === reply.id">

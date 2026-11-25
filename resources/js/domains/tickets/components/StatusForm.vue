@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import FormError from '@/components/FormError.vue';
 import { TICKET_STATUSES, ticketStore, type Ticket, type TicketStatus } from '@/domains/tickets/store';
 import { statusLabel } from '../helpers';
 
@@ -41,6 +42,7 @@ const handleSubmit = async () => {
                     </option>
                 </select>
             </p>
+            <FormError name="status" />
 
             <button type="submit" :disabled="saving">Status opslaan</button>
         </form>

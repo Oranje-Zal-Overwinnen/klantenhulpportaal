@@ -9,8 +9,7 @@ const message = ref('');
 
 export const getErrorBag = computed(() => errorBag.value);
 export const getMessage = computed(() => message.value);
-
-export const getErrorByProperty = (property: string) => computed(() => errorBag.value[property]);
+export const hasErrors = computed(() => Object.keys(errorBag.value).length > 0);
 
 export const setErrorBag = (bag: ErrorBag) => (errorBag.value = bag);
 export const setMessage = (newMessage: string) => {

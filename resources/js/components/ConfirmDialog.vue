@@ -40,10 +40,15 @@ watch(() => props.open, sync, { flush: 'post' });
 </script>
 
 <template>
-    <dialog ref="dialog" :aria-labelledby="titleId" @cancel.prevent="emit('cancel')">
+    <dialog
+        ref="dialog"
+        :aria-labelledby="titleId"
+        class="w-full max-w-md rounded-lg p-6 shadow-xl backdrop:bg-slate-900/40"
+        @cancel.prevent="emit('cancel')"
+    >
         <h2 :id="titleId">{{ title }}</h2>
         <slot />
-        <menu>
+        <menu class="mt-4 flex justify-end gap-2">
             <button type="button" :disabled="busy" @click="emit('cancel')">Annuleren</button>
             <button type="button" :disabled="busy" @click="emit('confirm')">{{ confirmLabel }}</button>
         </menu>

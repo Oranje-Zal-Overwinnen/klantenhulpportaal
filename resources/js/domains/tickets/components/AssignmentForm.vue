@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import FormError from '@/components/FormError.vue';
 import { userStore } from '@/domains/users/store';
 import { ticketStore, type Ticket } from '@/domains/tickets/store';
 
@@ -58,6 +59,7 @@ const handleSubmit = async () => {
                     </option>
                 </select>
             </p>
+            <FormError name="assigned_to" />
 
             <button type="submit" :disabled="assigning">Toewijzen</button>
         </form>

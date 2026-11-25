@@ -4,6 +4,7 @@ import { authStore } from '@/domains/auth/store';
 import { categoryRoutes } from '@/domains/categories/routes';
 import { ticketRoutes } from '@/domains/tickets/routes';
 import { userRoutes } from '@/domains/users/routes';
+import { destroyErrors, destroyMessage } from '@/services/error';
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -35,4 +36,9 @@ router.beforeEach(async to => {
     }
 
     return true;
+});
+
+router.afterEach(() => {
+    destroyErrors();
+    destroyMessage();
 });

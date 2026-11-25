@@ -28,7 +28,7 @@ const deleteUser = async () => {
 </script>
 
 <template>
-    <button type="button" @click="open = true">Verwijder</button>
+    <button type="button" class="bg-red-600 hover:bg-red-700" @click="open = true">Verwijder</button>
 
     <ConfirmDialog
         :open="open"

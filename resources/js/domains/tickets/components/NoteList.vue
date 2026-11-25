@@ -51,8 +51,8 @@ const handleDeleted = () => {
 
         <p v-if="!notes.length">Nog geen notities.</p>
 
-        <ul v-else>
-            <li v-for="note in notes" :key="note.id">
+        <ul v-else class="mt-3 space-y-3">
+            <li v-for="note in notes" :key="note.id" class="rounded-md border border-slate-200 bg-white p-3">
                 <p>{{ fullName(note.author) }} - {{ formatDate(note.created_at) }}</p>
 
                 <template v-if="editingNoteId === note.id">
