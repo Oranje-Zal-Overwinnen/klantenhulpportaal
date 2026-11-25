@@ -30,13 +30,13 @@ class TicketReplyNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return new MailMessage()
             ->subject('Nieuwe reactie op je ticket')
-            ->greeting('Hallo '.$notifiable->first_name.',')
-            ->line('Er is een nieuwe reactie geplaatst op je ticket "'.$this->ticket->title.'".')
-            ->line('"'.$this->reply->body.'"')
-            ->action('Bekijk ticket', url('/tickets/'.$this->ticket->id))
+            ->greeting('Hallo ' . $notifiable->first_name . ',')
+            ->line('Er is een nieuwe reactie geplaatst op je ticket "' . $this->ticket->title . '".')
+            ->line('"' . $this->reply->body . '"')
+            ->action('Bekijk ticket', url('/tickets/' . $this->ticket->id))
             ->line('Je kunt het ticket en de reactie bekijken in het Klantenhulpportaal.')
-            ->salutation('Met vriendelijke groet,'.PHP_EOL.'Klantenhulpportaal');
+            ->salutation('Met vriendelijke groet,' . PHP_EOL . 'Klantenhulpportaal');
     }
 }

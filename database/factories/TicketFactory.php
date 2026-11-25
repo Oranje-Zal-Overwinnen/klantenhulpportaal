@@ -32,7 +32,7 @@ class TicketFactory extends Factory
      */
     public function assignedTo(User $admin): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'assigned_to' => $admin->id,
         ]);
     }
@@ -42,7 +42,7 @@ class TicketFactory extends Factory
      */
     public function resolved(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => Ticket::STATUS_RESOLVED,
         ]);
     }

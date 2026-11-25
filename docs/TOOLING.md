@@ -1,7 +1,5 @@
 # Tooling
 
-Dit document beschrijft de toolset die voor het Klantenhulpportaal is gebruikt. Het hoort bij issue #1 (KLA-11723).
-
 ## Acceptance criteria
 
 | Criterium | Status | Waar |

@@ -1,7 +1,5 @@
 # Flowchart
 
-Dit document beschrijft de flow voor het aanmaken van een ticket. Het hoort bij issue #4 (KLA-11749).
-
 ## Hoofdflow: ticket aanmaken
 
 ```mermaid

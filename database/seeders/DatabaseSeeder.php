@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             'Netwerk',
             'Account',
             'Overig',
-        ])->mapWithKeys(fn (string $name) => [
+        ])->mapWithKeys(fn(string $name) => [
             $name => Category::factory()->create(['name' => $name]),
         ]);
 

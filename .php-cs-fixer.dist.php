@@ -5,16 +5,16 @@ declare(strict_types=1);
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
-return (new Config())
+return new Config()
+    ->setUnsupportedPhpVersionAllowed(true) // <-- Allows running on newer/unsupported PHP versions
     ->setRiskyAllowed(false)
     ->setRules([
-        '@auto' => true
+        '@auto' => true,
     ])
     // 💡 by default, Fixer looks for `*.php` files excluding `./vendor/` - here, you can groom this config
     ->setFinder(
-        (new Finder())
+        new Finder()
             // 💡 root folder to check
             ->in(__DIR__)
-            
     )
 ;
