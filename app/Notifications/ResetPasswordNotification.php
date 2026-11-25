@@ -15,7 +15,7 @@ class ResetPasswordNotification extends ResetPassword implements ShouldQueue
      */
     protected function resetUrl($notifiable): string
     {
-        return url('/reset-password?' . http_build_query([
+        return url('/reset-password?'.http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ]));
@@ -27,15 +27,15 @@ class ResetPasswordNotification extends ResetPassword implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         $resetUrl = $this->resetUrl($notifiable);
-        $expireMinutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire');
+        $expireMinutes = config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
 
         return new MailMessage()
             ->subject('Wachtwoord opnieuw instellen')
-            ->greeting('Hallo ' . $notifiable->first_name . ',')
+            ->greeting('Hallo '.$notifiable->first_name.',')
             ->line('Je ontvangt deze e-mail omdat er een verzoek is gedaan om je wachtwoord opnieuw in te stellen.')
             ->action('Wachtwoord opnieuw instellen', $resetUrl)
-            ->line('Deze link is ' . $expireMinutes . ' minuten geldig.')
+            ->line('Deze link is '.$expireMinutes.' minuten geldig.')
             ->line('Heb je dit niet aangevraagd? Dan kun je deze e-mail negeren.')
-            ->salutation('Met vriendelijke groet,' . PHP_EOL . 'Klantenhulpportaal');
+            ->salutation('Met vriendelijke groet,'.PHP_EOL.'Klantenhulpportaal');
     }
 }

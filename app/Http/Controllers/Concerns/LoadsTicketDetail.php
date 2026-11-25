@@ -15,11 +15,11 @@ trait LoadsTicketDetail
             'creator',
             'assignee',
             'categories',
-            'replies' => fn($query) => $query->with('author')->oldest('created_at')->oldest('id'),
+            'replies' => fn ($query) => $query->with('author')->oldest('created_at')->oldest('id'),
         ];
 
         if ($user->can('viewAny', Note::class)) {
-            $relations['notes'] = fn($query) => $query->with('author')->oldest('created_at')->oldest('id');
+            $relations['notes'] = fn ($query) => $query->with('author')->oldest('created_at')->oldest('id');
         }
 
         $ticket->load($relations);

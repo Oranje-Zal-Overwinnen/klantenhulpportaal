@@ -19,7 +19,7 @@ class ReplyResource extends JsonResource
             'ticket_id' => $this->ticket_id,
             'user_id' => $this->user_id,
             'body' => $this->body,
-            'author' => $this->whenLoaded('author', fn() => new UserResource($this->author)),
+            'author' => $this->whenLoaded('author', fn () => new UserResource($this->author)),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
