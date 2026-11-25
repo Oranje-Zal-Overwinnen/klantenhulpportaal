@@ -504,6 +504,16 @@ class AuthorizationTest extends TestCase
             ->assertJsonPath('message', 'De resetlink is ongeldig of verlopen.');
     }
 
+    public function test_password_reset_mail_links_directly_to_the_spa_reset_page(): void
+    {
+        $user = User::factory()->create();
+        $notification = new ResetPasswordNotification('test-token');
+        $mail = $notification->toMail($user);
+
+        $this->assertStringContainsString('/reset-password?token=test-token', $mail->actionUrl);
+        $this->assertStringContainsString(urlencode($user->email), $mail->actionUrl);
+    }
+
     public function test_unverified_user_cannot_login(): void
     {
         $user = User::factory()->unverified()->create();

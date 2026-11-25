@@ -17,7 +17,8 @@ Dit document beschrijft de toolset die voor het Klantenhulpportaal is gebruikt. 
 
 | Tool | Versie / configuratie | Doel |
 | --- | --- | --- |
-| PHP | `^8.3` (lokaal 8.6) | Runtime |
+| PHP | `^8.4` in `composer.json`; CI gebruikt de latest stable via setup-php (lokaal 8.6) | Runtime |
+| Node.js | 26 (latest LTS) in CI | Frontend build |
 | Laravel | `^13.17` | Framework, routing, Eloquent, validatie |
 | Laravel Sanctum | `^4.0` | SPA-authenticatie met sessie/cookies |
 | Laravel Pint | `^1.27` | PHP code style |

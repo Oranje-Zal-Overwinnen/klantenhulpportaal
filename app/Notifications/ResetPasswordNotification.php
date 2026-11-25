@@ -9,6 +9,19 @@ use Illuminate\Notifications\Messages\MailMessage;
 class ResetPasswordNotification extends ResetPassword implements ShouldQueue
 {
     /**
+     * Get the reset URL for the given notifiable.
+     *
+     * @param  mixed  $notifiable
+     */
+    protected function resetUrl($notifiable): string
+    {
+        return url('/reset-password?'.http_build_query([
+            'token' => $this->token,
+            'email' => $notifiable->getEmailForPasswordReset(),
+        ]));
+    }
+
+    /**
      * Build the mail representation of the notification.
      */
     public function toMail($notifiable): MailMessage
